@@ -18,7 +18,7 @@ char USART_RW_GPIO_UNEXPORT[50];
 char USART_RW_GPIO_DIRECTION[50];
 char USART_RW_GPIO_VALUE[50];
 
-int uart0=-1;
+int uart0 = -1;
 
 //_____________________D E C L A R A T I O N S___________________________
 void InitUsart (void);
@@ -27,22 +27,14 @@ void UsartSend (char command[255]);
 void CloseUsart(void);
 
 
-//_____________________   F U N C T I O N S   ___________________________
+
+
+// ------------------------------- Init Usart ------------------------------ //
 pthread_t PTHUsart = 0;
 void InitUsart (void) {
     sprintf(strToPrint,"INIT USART AT:%s SPEED:%i",USART_PORT,USART_BAUD);
     MyPrint();
 
-    // G P I O   -   R S - 4 8 5 //
-    if (USART_RW_GPIO_ENABLE){
-        sprintf(strToPrint,"Init GPIO-%i as RS485_R/W",USART_RW_GPIO_ENABLE);
-        MyPrint();
-        
-        //_____Init GPIO as RW for Max485_________
-        system(USART_RW_GPIO_EXPORT);
-        system(USART_RW_GPIO_DIRECTION);
-    }
-    
     uart0 = open(USART_PORT, O_RDWR | O_NOCTTY | O_NDELAY);         //Open in non blocking read/write mode
     if (uart0 == -1){
         sprintf(strToPrint,"Error - Unable to open UART.  Ensure it is not in use by another application");
@@ -71,7 +63,7 @@ void InitUsart (void) {
         options.c_lflag = 0;
         tcflush(uart0, TCIFLUSH);
         tcsetattr(uart0, TCSANOW, &options);
-    
+
         // Read old data //
         usleep(10000);
         if (uart0 != -1) {
@@ -79,16 +71,16 @@ void InitUsart (void) {
             int rx_length = read(uart0, (void*)rx_buffer, 1024);
         }
     }
-    
+
     // Creating pthead //
-//    pthread_t PTHUsart = 0;
-if (PTHUsart == 0) {
-    if (pthread_create(&PTHUsart, NULL, ReadUsart, NULL) != 0) {
-        sprintf(strToPrint,"Error opening Usart PTHead");
-        MyPrint ();
-        done=1;
+    //    pthread_t PTHUsart = 0;
+    if (PTHUsart == 0) {
+        if (pthread_create(&PTHUsart, NULL, ReadUsart, NULL) != 0) {
+            sprintf(strToPrint,"Error opening Usart PTHead");
+            MyPrint ();
+            done=1;
+        }
     }
-}
 
 }
 
@@ -97,52 +89,64 @@ void ReastartUsart (){
   InitUsart();
 }
 
-char UsartCommandBad[1024];
-char UsartCommand[1024];
-void *ReadUsart(void *arg){	// Read Usart
+
+
+// ------------------------------- Read Usart ------------------------------ //
+char usart_rx_start[1024];
+void *ReadUsart(void *arg) {	// Read Usart
     while (!done) {
+        // Usart opened //
         if (uart0 != -1) {
-            char rx_buffer[1024] = "";
-            int rx_length = read(uart0, (void*)rx_buffer, 1024);     //read
-            if (rx_length < 0) { /* No Data */ }
+            // Read usart //
+            char usart_rx[1024] = "";
+            int usart_rx_length = read(uart0, (void*)usart_rx, 1024);//read
+
             /* An error occured (will occur if there are no bytes) */
-            else if (rx_length == 0) {
-                sprintf(strToPrint,"USART - Dev-error!");
+            if (usart_rx_length == 0) {
+                sprintf(strToPrint, "USART - Dev-error!");
                 MyPrint();
                 ReastartUsart ();
             }
+            /* No Data */
+            else if (usart_rx_length < 0) {  }
+
             /* Bytes received */
             else {
-                sprintf(UsartCommand,"%s",rx_buffer);
-                
+                // sprintf(strToPrint, "rx:%d:", usart_rx_length);
+                // MyPrint();
+                // sprintf(strToPrint, "rx+:%lu:", (usart_rx_length + strlen(usart_rx_start)));
+                // MyPrint();
+
+                if ((usart_rx_length + strlen(usart_rx_start)) < 1024) {
+                    char usart_rx_tmp[1024] = "";
+                    sprintf(usart_rx_tmp, "%s%s", usart_rx_start, usart_rx);
+                    sprintf(usart_rx, "%s", usart_rx_tmp);
+                }
+                sprintf(usart_rx_start, "%s", "");
+
                 /*   ALL COMAND   */
-                if (UsartCommand[strlen(UsartCommand)-1]=='\n' || UsartCommand[strlen(UsartCommand)-1]==EndOfString){
-                    if (strlen(rx_buffer)+strlen(UsartCommandBad)<1024){
-                        sprintf(UsartCommand,"%s%s",UsartCommandBad,rx_buffer);
-                    }
-                    sprintf(UsartCommandBad,"%s","");
-                    
-                    sprintf(strToPrint,"USART - %s",UsartCommand);
+                if (usart_rx[strlen(usart_rx) - 1] == '\n' || usart_rx[strlen(usart_rx) - 1] == EndOfString){
+                    sprintf(strToPrint, "USART - %s", usart_rx);
                     MyPrint();
-                    
-//                    WriteToInFile(UsartCommand);
-                    Tcp_Send(UsartCommand);
-                    MakeUserAuto (UsartCommand, 0);
+
+                    Tcp_Send(usart_rx);
+                    MakeUserAuto (usart_rx, 0);
                 }
                 /*   NOT ALL COMAND   */
                 else {
-                    if (LogNotEndedString==1){
-                        sprintf(strToPrint,"USART BAD - %s",UsartCommand);
+                    if (LogNotEndedString == 1){
+                        sprintf(strToPrint, "USART BAD - %s", usart_rx);
                         MyPrint();
                     }
-                    if (strlen(rx_buffer)+strlen(UsartCommandBad)<1024)
-                        sprintf(UsartCommandBad,"%s%s",UsartCommandBad,rx_buffer);
+                    if ((strlen(usart_rx) + strlen(usart_rx_start)) < 1024)
+                        sprintf(usart_rx_start, "%s%s", usart_rx_start, usart_rx);
                     else
-                        sprintf(UsartCommandBad,"%s",rx_buffer);
+                        sprintf(usart_rx_start, "%s", usart_rx);
                 }
             }
             usleep(10000);
         }
+        // Error opned usart //
         else {
 //            sprintf(strToPrint,"USART - Dev-error!");
 //            MyPrint();
@@ -153,16 +157,11 @@ void *ReadUsart(void *arg){	// Read Usart
     return 0;
 }
 
+
+
+// ----------------------------- Send to usart ----------------------------- //
 void UsartSend (char command[255]) {		// SEND TO USART
     if (uart0 != -1) {
-        // G P I O   -   R S - 4 8 5 //
-        if (USART_RW_GPIO_ENABLE){
-            FILE *fp;
-            fp=fopen(USART_RW_GPIO_VALUE,"w");              //Max485 transmit mode
-            putc('1',fp);
-            fclose(fp);
-        }
-        
         //   S E N D   //
         int commandLen;
         commandLen = strlen(command);
@@ -175,15 +174,6 @@ void UsartSend (char command[255]) {		// SEND TO USART
             ReastartUsart();
             if (uart0 != -1) UsartSend (command);
         }
-        
-        // G P I O   -   R S - 4 8 5 //
-        if (USART_RW_GPIO_ENABLE){
-            usleep(USART_SLEEP_BYTE*(commandLen-1)+USART_SLEEP);    //Sleep.....
-            FILE *fp;
-            fp=fopen(USART_RW_GPIO_VALUE,"w");              //Max485 resave mode
-            putc('0',fp);
-            fclose(fp);
-        }
     }
     else {
         ReastartUsart();
@@ -191,7 +181,10 @@ void UsartSend (char command[255]) {		// SEND TO USART
     }
 }
 
-void CloseUsart(void){
+
+
+// ------------------------------ Close Usart ------------------------------ //
+void CloseUsart(void) {
     sprintf(strToPrint,"USART: Stop.");
     MyPrint();
     close(uart0);

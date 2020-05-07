@@ -8,7 +8,7 @@
 //#include <pwd.h>
 
 #define PROGRAMM_NAME "Myhome"
-#define PROGRAMM_VERSION "2.5.5"
+#define PROGRAMM_VERSION "2.5.6"
 
 
 //_____________________   V A R I A B L E S   ___________________________
@@ -43,7 +43,6 @@ void MakeUserAuto (char *comm, int send);
 #include "usart.h"
 #include "tcpserver.h"
 #include "readsetts.h"
-#include "filesio.h"
 #include "auto.h"
 
 
@@ -70,7 +69,7 @@ void InitSelfKilling (void) {
     memset(&action, 0, sizeof(struct sigaction));
     action.sa_handler = term;
     sigaction(SIGTERM, &action, NULL);
-    
+
     /* Set the SIGINT (Ctrl-C) signal handler to sigintHandler */
     signal(SIGINT, sigintHandler);
 }
@@ -79,7 +78,7 @@ void InitSelfKilling (void) {
 //_________________________ M A I N ____________________________//
 int main (int argc, char *argv[]) {
     InitSelfKilling();
-    
+
     int i;
     for (i=1; i<argc; i++){
         if ((argv[i][0]=='-') || (argv[i][0]=='/')){
@@ -107,16 +106,15 @@ int main (int argc, char *argv[]) {
             }
         }
     }
-    
-    
+
+
     ReadMainSettsFile();
     ReadAutoFile();
-    
+
     sprintf(strToPrint,"-------- S T A R T I N G   %s:%s --------",PROGRAMM_NAME,PROGRAMM_VERSION);
     MyPrint();
-    
+
     done=0;
-//    InitFilesIO();
     InitUsart();
     StartTcpServer();
 
@@ -132,10 +130,9 @@ int main (int argc, char *argv[]) {
     while (!done) {
         usleep(100000);
     }
-    
+
     //___ E X I T I N G ___//
     CloseUsart();
     Tcp_close();
-    CloseFilesIO();
     return 0;
 }
