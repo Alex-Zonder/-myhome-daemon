@@ -8,7 +8,13 @@
 //#include <pwd.h>
 
 #define PROGRAMM_NAME "Myhome"
-#define PROGRAMM_VERSION "2.5.6"
+#define PROGRAMM_VERSION "2.6.beta"
+
+
+//____________________   V E N D O R S   ___________________________
+#include "hex-converter.h"
+#include "vendor/uniel.h"
+
 
 
 //_____________________   V A R I A B L E S   ___________________________

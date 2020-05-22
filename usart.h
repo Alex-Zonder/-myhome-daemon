@@ -20,6 +20,11 @@ char USART_RW_GPIO_VALUE[50];
 
 int uart0 = -1;
 
+
+/* Vendors */
+char vendorUniel = 0;
+
+
 //_____________________D E C L A R A T I O N S___________________________
 void InitUsart (void);
 void *ReadUsart(void *arg);
@@ -112,36 +117,56 @@ void *ReadUsart(void *arg) {	// Read Usart
 
             /* Bytes received */
             else {
-                // sprintf(strToPrint, "rx:%d:", usart_rx_length);
-                // MyPrint();
-                // sprintf(strToPrint, "rx+:%lu:", (usart_rx_length + strlen(usart_rx_start)));
-                // MyPrint();
+                // Cyber-Light //
+                if (!vendorUniel) {
+                    if ((usart_rx_length + strlen(usart_rx_start)) < 1024) {
+                        char usart_rx_tmp[1024] = "";
+                        sprintf(usart_rx_tmp, "%s%s", usart_rx_start, usart_rx);
+                        sprintf(usart_rx, "%s", usart_rx_tmp);
+                    }
+                    sprintf(usart_rx_start, "%s", "");
 
-                if ((usart_rx_length + strlen(usart_rx_start)) < 1024) {
-                    char usart_rx_tmp[1024] = "";
-                    sprintf(usart_rx_tmp, "%s%s", usart_rx_start, usart_rx);
-                    sprintf(usart_rx, "%s", usart_rx_tmp);
+                    /*   ALL COMAND   */
+                    if (usart_rx[strlen(usart_rx) - 1] == '\n' || usart_rx[strlen(usart_rx) - 1] == EndOfString){
+                        sprintf(strToPrint, "USART - %s", usart_rx);
+                        MyPrint();
+
+                        Tcp_Send(usart_rx);
+                        MakeUserAuto (usart_rx, 0);
+                    }
+                    /*   NOT ALL COMAND   */
+                    else {
+                        if (LogNotEndedString == 1){
+                            sprintf(strToPrint, "USART BAD - %s", usart_rx);
+                            MyPrint();
+                        }
+                        if ((strlen(usart_rx) + strlen(usart_rx_start)) < 1024)
+                            sprintf(usart_rx_start, "%s%s", usart_rx_start, usart_rx);
+                        else
+                            sprintf(usart_rx_start, "%s", usart_rx);
+                    }
                 }
-                sprintf(usart_rx_start, "%s", "");
 
-                /*   ALL COMAND   */
-                if (usart_rx[strlen(usart_rx) - 1] == '\n' || usart_rx[strlen(usart_rx) - 1] == EndOfString){
+
+                // Uniel //
+                if (vendorUniel) {
+                    // With out controller //
+                    if (usart_rx_length > 10) {
+                        const char rxShort[10];
+                        memcpy(rxShort, usart_rx + 8, 8);
+                        //unielCheck(rxShort, 8);
+                        sprintf(usart_rx, "%s", unielCheck(rxShort, 8));
+                    }
+                    // Only client data //
+                    else {
+                        sprintf(usart_rx, "%s", unielCheck(usart_rx, 8));
+                    }
+
                     sprintf(strToPrint, "USART - %s", usart_rx);
                     MyPrint();
 
                     Tcp_Send(usart_rx);
                     MakeUserAuto (usart_rx, 0);
-                }
-                /*   NOT ALL COMAND   */
-                else {
-                    if (LogNotEndedString == 1){
-                        sprintf(strToPrint, "USART BAD - %s", usart_rx);
-                        MyPrint();
-                    }
-                    if ((strlen(usart_rx) + strlen(usart_rx_start)) < 1024)
-                        sprintf(usart_rx_start, "%s%s", usart_rx_start, usart_rx);
-                    else
-                        sprintf(usart_rx_start, "%s", usart_rx);
                 }
             }
             usleep(10000);
@@ -162,11 +187,24 @@ void *ReadUsart(void *arg) {	// Read Usart
 // ----------------------------- Send to usart ----------------------------- //
 void UsartSend (char command[255]) {		// SEND TO USART
     if (uart0 != -1) {
-        //   S E N D   //
         int commandLen;
-        commandLen = strlen(command);
-        if (command[commandLen-1]=='\n') commandLen=commandLen-2;
-        int count = write(uart0, command, commandLen);  //Sending.....
+
+        //   Cyber-Light   //
+        if (!vendorUniel) {
+            commandLen = strlen(command);
+            if (command[commandLen-1]=='\n') commandLen=commandLen-2;
+            else sprintf(strToPrint,"Send: %s", command);
+        }
+        //   Uniel   //
+        else if (vendorUniel) {
+            commandLen = 8;
+            memcpy(command, cyber2uniel(command), 8);
+            sprintf(strToPrint,"Send: %s", hex2string(command, 8));
+        }
+        MyPrint ();
+
+        //   S E N D   //
+        int count = write(uart0, command, commandLen);
         /* Error sending */
         if (count < 0) {
             sprintf(strToPrint,"UART TX error");
