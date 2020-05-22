@@ -24,10 +24,6 @@ char FILE_CONF[128]="/etc/myhome.conf";
 char UserSettsFile[128]="";
 char MainUser[50]="";
 
-char FilesFolder[128]="";
-char IN_FILE[50]="";
-char OUT_FILE[50]="";
-
 int LogDays=0;
 char LogFolder[128]="";
 

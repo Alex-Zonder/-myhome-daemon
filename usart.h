@@ -10,19 +10,12 @@ int USART_BAUD;
 char EndOfString;
 int LogNotEndedString;
 
-int USART_SLEEP;
-int USART_SLEEP_BYTE;
-int USART_RW_GPIO_ENABLE;
-char USART_RW_GPIO_EXPORT[50];
-char USART_RW_GPIO_UNEXPORT[50];
-char USART_RW_GPIO_DIRECTION[50];
-char USART_RW_GPIO_VALUE[50];
 
 int uart0 = -1;
 
 
 /* Vendors */
-char vendorUniel = 0;
+char vendorUniel = 1;
 
 
 //_____________________D E C L A R A T I O N S___________________________
