@@ -15,7 +15,7 @@ int uart0 = -1;
 
 
 /* Vendors */
-char vendorUniel = 1;
+char vendorUniel = 0;
 
 
 //_____________________D E C L A R A T I O N S___________________________
@@ -146,9 +146,9 @@ void *ReadUsart(void *arg) {	// Read Usart
                     // With out controller //
                     if (usart_rx_length > 10) {
                         const char rxShort[10];
-                        memcpy(rxShort, usart_rx + 8, 8);
+                        memcpy((unsigned char*)rxShort, usart_rx + 8, 8);
                         //unielCheck(rxShort, 8);
-                        sprintf(usart_rx, "%s", unielCheck(rxShort, 8));
+                        sprintf(usart_rx, "%s", unielCheck((unsigned char*)rxShort, 8));
                     }
                     // Only client data //
                     else {

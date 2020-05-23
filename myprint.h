@@ -20,8 +20,8 @@ void GetTime (void){
     /* Convert to string. */
     sprintf(myTime,"%02d:%02d:%02d:%03d",
             aTm->tm_hour,aTm->tm_min,aTm->tm_sec,
-            now.tv_usec/1000);
-    
+            (int)now.tv_usec/1000);
+
 }
 
 
@@ -34,19 +34,19 @@ void MyPrint (void) {
     }
     GetTime();
 
-    
+
     if (viewToScreen){
         printf ("%s - %s\n",myTime,strToPrint);
         fflush(stdout);
     }
-    
+
     if (LogDays){
         /* Generate neme of file */
         DIR* dir = opendir(LogFolder);
         if (!dir){
             printf ("%s - Make Logs directory\n",myTime);
             fflush(stdout);
-            char mkLog[128];
+            char mkLog[140];
             sprintf(mkLog,"mkdir %s",LogFolder);
             system(mkLog);
         }
@@ -58,14 +58,14 @@ void MyPrint (void) {
         char fileLog[50];
         sprintf(fileLog,"%s-%s-%s.txt",year,month,day);
         /* Writing file */
-        char filename[128];
+        char filename[256];
         sprintf(filename, "%s/%s",LogFolder,fileLog);
         FILE *file = fopen ( filename, "a+" );
         if ( file != NULL ) {
             fprintf(file, "%s - %s\n",myTime,strToPrint);
         }
         fclose (file);
-        
+
         /* Delete old files*/
         int filesCount=0;
         struct dirent **namelist;
@@ -80,7 +80,7 @@ void MyPrint (void) {
                     //printf("%s\n", namelist[n]->d_name);
                     if (filesCount>LogDays) {
                         //printf("remove %s\n", namelist[n]->d_name);
-                        char sysCom[256];
+                        char sysCom[512];
                         sprintf(sysCom,"exec rm -r %s/%s",LogFolder,namelist[n]->d_name);
                         system(sysCom);
                     }
@@ -91,4 +91,3 @@ void MyPrint (void) {
         }
     }
 }
-

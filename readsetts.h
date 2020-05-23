@@ -34,51 +34,29 @@ void ReadMainSettsFile () {
                     x1++;
                 }
 
-
-                // if (strcmp(name,"USART_RW_GPIO_ENABLE")==0){
-                //     USART_RW_GPIO_ENABLE=atoi(data);
-                //
-                //     strcpy (USART_RW_GPIO_EXPORT,"echo ");
-                //     strcat (USART_RW_GPIO_EXPORT,data);
-                //     strcat (USART_RW_GPIO_EXPORT," > /sys/class/gpio/export");
-                //
-                //     strcpy (USART_RW_GPIO_UNEXPORT,"echo ");
-                //     strcat (USART_RW_GPIO_UNEXPORT,data);
-                //     strcat (USART_RW_GPIO_UNEXPORT," > /sys/class/gpio/unexport");
-                //
-                //     strcpy (USART_RW_GPIO_DIRECTION,"echo out > /sys/class/gpio/gpio");
-                //     strcat (USART_RW_GPIO_DIRECTION,data);
-                //     strcat (USART_RW_GPIO_DIRECTION,"/direction");
-                //
-                //     strcpy (USART_RW_GPIO_VALUE,"/sys/class/gpio/gpio");
-                //     strcat (USART_RW_GPIO_VALUE,data);
-                //     strcat (USART_RW_GPIO_VALUE,"/value");
-                // }
-
+				// Serial settings //
                 if (strcmp(name,"UsartPort")==0) strcpy(USART_PORT,data);
                 else if (strcmp(name,"UsartBaud")==0) USART_BAUD=atoi(data);
                 else if (strcmp(name,"EndOfString")==0) EndOfString=data[0];
                 else if (strcmp(name,"LogNotEndedString")==0) LogNotEndedString=atoi(data);
-
+				// Tcp settings //
                 else if (strcmp(name,"TcpPort")==0) strcpy(TCP_PORT,data);
-                else if (strcmp(name,"WwwFolder")==0) strcpy(WWW_FOLDER,data);
-                else if (strcmp(name,"CgiFolder")==0) strcpy(CGI_FOLDER,data);
-
+				// Statistic settings //
                 else if (strcmp(name,"LogDays")==0) LogDays=atoi(data);
                 else if (strcmp(name,"LogFolder")==0) strcpy(LogFolder,data);
-
+				// Auto settings //
                 else if (strcmp(name,"UserSettsFile")==0) strcpy(UserSettsFile,data);
-                else if (strcmp(name,"MainUser")==0) strcpy(MainUser,data);
-
+                //else if (strcmp(name,"MainUser")==0) strcpy(MainUser,data);
+				// Vendors //
+				else if (strcmp(name,"vendor-uniel")==0) vendorUniel=atoi(data);
             }
         }
         fclose (file);
-
-        //sprintf(strToPrint,"---------- %s ------------",FilesFolder);
-        //MyPrint();
     }
     else{perror (filename); /* why didn't the file open? */}
 }
+
+
 
 //_____________________________A U T O__________________________________//
 char fileComm[50][50];

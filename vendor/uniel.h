@@ -123,10 +123,10 @@ int unielChecksum(unsigned char* input)
 // Check input data for uniel //
 char*  unielCheck(unsigned char* input, int len)
 {
-	if (unielChecksum(input)) {
+	// if (unielChecksum(input)) {
 		char* hexStr = hex2string(input, 8);
 		char* toRet = uniel2cyber(input);
 		printf("Read %i bytes: %s -> %s\n", len, hexStr, toRet);
 		return toRet;
-	}
+	// }
 }
