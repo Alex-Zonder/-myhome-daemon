@@ -26,7 +26,7 @@ void GetTime (void){
 
 
 
-char strToPrint[2048];
+char strToPrint[4096];
 void MyPrint (void) {
     if (strToPrint[strlen(strToPrint)-1]=='\n') {
         //strToPrint[strlen(strToPrint)]='\0';

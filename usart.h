@@ -186,15 +186,15 @@ void UsartSend (char command[255]) {		// SEND TO USART
         if (!vendorUniel) {
             commandLen = strlen(command);
             if (command[commandLen-1]=='\n') commandLen=commandLen-2;
-            else sprintf(strToPrint,"Send: %s", command);
+            //else sprintf(strToPrint,"Send: %s", command);
         }
         //   Uniel   //
         else if (vendorUniel) {
             commandLen = 8;
             memcpy(command, cyber2uniel(command), 8);
             sprintf(strToPrint,"Send: %s", hex2string(command, 8));
+			MyPrint ();
         }
-        MyPrint ();
 
         //   S E N D   //
         int count = write(uart0, command, commandLen);
