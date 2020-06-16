@@ -109,7 +109,9 @@ void *ReadUsart(void *arg) {	// Read Usart
             /* No Data */
             else if (usart_rx_length < 0) {
                 if (strlen(usart_rx_start) > 0) {
-                    if (usart_rx_start_while_counter++ == 5) {
+                    if (usart_rx_start_while_counter++ >= 5) {
+                        sprintf(strToPrint, "USART - Reset:%i:%i:%s", usart_rx_start_while_counter, strlen(usart_rx_start), usart_rx_start);
+                        MyPrint();
                         sprintf(usart_rx_start, "%s", "");
                         usart_rx_start_while_counter = 0;
                     }
@@ -126,6 +128,7 @@ void *ReadUsart(void *arg) {	// Read Usart
                         sprintf(usart_rx, "%s", usart_rx_tmp);
                     }
                     sprintf(usart_rx_start, "%s", "");
+                    usart_rx_start_while_counter = 0;
 
                     /*   ALL COMAND   */
                     if (usart_rx[strlen(usart_rx) - 1] == '\n' || usart_rx[strlen(usart_rx) - 1] == EndOfString){
