@@ -91,6 +91,7 @@ void ReastartUsart (){
 
 // ------------------------------- Read Usart ------------------------------ //
 char usart_rx_start[1024];
+int usart_rx_start_while_counter = 0;
 void *ReadUsart(void *arg) {	// Read Usart
     while (!done) {
         // Usart opened //
@@ -108,7 +109,10 @@ void *ReadUsart(void *arg) {	// Read Usart
             /* No Data */
             else if (usart_rx_length < 0) {
                 if (strlen(usart_rx_start) > 0) {
-                    sprintf(usart_rx_start, "%s", "");
+                    if (usart_rx_start_while_counter++ == 5) {
+                        sprintf(usart_rx_start, "%s", "");
+                        usart_rx_start_while_counter = 0;
+                    }
                 }
             }
 
