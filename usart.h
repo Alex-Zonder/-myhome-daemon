@@ -106,7 +106,11 @@ void *ReadUsart(void *arg) {	// Read Usart
                 ReastartUsart ();
             }
             /* No Data */
-            else if (usart_rx_length < 0) {  }
+            else if (usart_rx_length < 0) {
+                if (strlen(usart_rx_start) > 0) {
+                    sprintf(usart_rx_start, "%s", "");
+                }
+            }
 
             /* Bytes received */
             else {
