@@ -16,6 +16,7 @@ int uart0 = -1;
 
 /* Vendors */
 char vendorUniel = 0;
+char vendorModbusRtu = 1;
 
 
 //_____________________D E C L A R A T I O N S___________________________
@@ -121,7 +122,7 @@ void *ReadUsart(void *arg) {	// Read Usart
             /* Bytes received */
             else {
                 // Cyber-Light //
-                if (!vendorUniel) {
+                if (!vendorUniel && !vendorModbusRtu) {
                     if ((usart_rx_length + strlen(usart_rx_start)) < 1024) {
                         char usart_rx_tmp[1024] = "";
                         sprintf(usart_rx_tmp, "%s%s", usart_rx_start, usart_rx);
@@ -172,6 +173,16 @@ void *ReadUsart(void *arg) {	// Read Usart
                     Tcp_Send(usart_rx);
                     MakeUserAuto (usart_rx, 0);
                 }
+
+
+                // ModBusRtu //
+                if (vendorModbusRtu) {
+                    sprintf(strToPrint, "USART - Read: %i bytes", usart_rx_length);
+                    MyPrint();
+                    sprintf(strToPrint,"%s", hex2string(usart_rx, 8));
+                    MyPrint ();
+                    // code..
+                }
             }
             usleep(10000);
         }
@@ -194,7 +205,7 @@ void UsartSend (char command[255]) {		// SEND TO USART
         int commandLen;
 
         //   Cyber-Light   //
-        if (!vendorUniel) {
+        if (!vendorUniel && !vendorModbusRtu) {
             commandLen = strlen(command);
             if (command[commandLen-1]=='\n') commandLen=commandLen-2;
         }
@@ -203,6 +214,13 @@ void UsartSend (char command[255]) {		// SEND TO USART
             commandLen = 8;
             memcpy(command, cyber2uniel(command), 8);
             sprintf(strToPrint,"Uniel Send: %s", hex2string(command, 8));
+            MyPrint ();
+        }
+        //   ModBusRtu   //
+        else if (vendorModbusRtu) {
+            commandLen = 8;
+            memcpy(command, cyber2modbusrtu(command), 8);
+            sprintf(strToPrint,"ModBusRtu Send: %s", hex2string(command, 8));
             MyPrint ();
         }
 

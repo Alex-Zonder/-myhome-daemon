@@ -14,11 +14,12 @@
 //____________________   V E N D O R S   ___________________________
 #include "hex-converter.h"
 #include "vendor/uniel.h"
+#include "vendor/modbusrtu.h"
 
 
 
 //_____________________   V A R I A B L E S   ___________________________
-/* S E T T I N G S */
+/*   S E T T I N G S   */
 char FILE_CONF[128]="/etc/myhome.conf";
 
 char UserSettsFile[128]="";
