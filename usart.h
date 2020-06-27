@@ -177,10 +177,10 @@ void *ReadUsart(void *arg) {	// Read Usart
 
                 // ModBusRtu //
                 if (vendorModbusRtu) {
-                    sprintf(strToPrint, "USART - Read: %i bytes", usart_rx_length);
-                    MyPrint();
-                    sprintf(strToPrint,"%s", hex2string(usart_rx, 8));
-                    MyPrint ();
+                    printf("USART - Read %i bytes", usart_rx_length);
+                    printf(":%s", hex2string(usart_rx, usart_rx_length));
+                    int crc = crc_chk(usart_rx, usart_rx_length-2);
+                    printf(":%02X\n", crc);
                     // code..
                 }
             }

@@ -8,7 +8,7 @@
 //#include <pwd.h>
 
 #define PROGRAMM_NAME "Myhome"
-#define PROGRAMM_VERSION "2.6"
+#define PROGRAMM_VERSION "2.6.1.b"
 
 
 //____________________   V E N D O R S   ___________________________
