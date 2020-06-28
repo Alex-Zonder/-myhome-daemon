@@ -69,7 +69,7 @@ unsigned char* cyber2modbusrtu(char* input) {
         mobusrtuData[4] = 0; // 04 - Hi Количество регистров
         mobusrtuData[5] = 0x01; // 05 - Lo Количество регистров
     }
-    // Ghange state //
+    // Change state //
     if (input[6] == 'N' || input[6] == 'F') {
         //   Command   //
         mobusrtuData[1] = 6; // 01 - command

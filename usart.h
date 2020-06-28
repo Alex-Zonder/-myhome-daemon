@@ -111,7 +111,7 @@ void *ReadUsart(void *arg) {	// Read Usart
             else if (usart_rx_length < 0) {
                 if (strlen(usart_rx_start) > 0) {
                     if (usart_rx_start_while_counter++ >= 5) {
-                        sprintf(strToPrint, "USART - Reset:%i:%i:%s", usart_rx_start_while_counter, strlen(usart_rx_start), usart_rx_start);
+                        sprintf(strToPrint, "USART - Reset:%i:%lu:%s", usart_rx_start_while_counter, strlen(usart_rx_start), usart_rx_start);
                         MyPrint();
                         sprintf(usart_rx_start, "%s", "");
                         usart_rx_start_while_counter = 0;
@@ -164,7 +164,7 @@ void *ReadUsart(void *arg) {	// Read Usart
                     }
                     // Only client data //
                     else {
-                        sprintf(usart_rx, "%s", unielCheck(usart_rx, 8));
+                        sprintf(usart_rx, "%s", unielCheck((unsigned char*)usart_rx, 8));
                     }
 
                     sprintf(strToPrint, "USART - %s", usart_rx);
@@ -178,8 +178,8 @@ void *ReadUsart(void *arg) {	// Read Usart
                 // ModBusRtu //
                 if (vendorModbusRtu) {
                     printf("USART - Read %i bytes", usart_rx_length);
-                    printf(":%s", hex2string(usart_rx, usart_rx_length));
-                    int crc = crc_chk(usart_rx, usart_rx_length-2);
+                    printf(":%s", hex2string((unsigned char*)usart_rx, usart_rx_length));
+                    int crc = crc_chk((unsigned char*)usart_rx, usart_rx_length-2);
                     printf(":%02X\n", crc);
                     // code..
                 }
@@ -213,14 +213,14 @@ void UsartSend (char command[255]) {		// SEND TO USART
         else if (vendorUniel) {
             commandLen = 8;
             memcpy(command, cyber2uniel(command), 8);
-            sprintf(strToPrint,"Uniel Send: %s", hex2string(command, 8));
+            sprintf(strToPrint,"Uniel Send: %s", hex2string((unsigned char*)command, 8));
             MyPrint ();
         }
         //   ModBusRtu   //
         else if (vendorModbusRtu) {
             commandLen = 8;
             memcpy(command, cyber2modbusrtu(command), 8);
-            sprintf(strToPrint,"ModBusRtu Send: %s", hex2string(command, 8));
+            sprintf(strToPrint,"ModBusRtu Send: %s", hex2string((unsigned char*)command, 8));
             MyPrint ();
         }
 
