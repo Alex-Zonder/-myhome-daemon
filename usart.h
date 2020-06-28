@@ -16,7 +16,7 @@ int uart0 = -1;
 
 /* Vendors */
 char vendorUniel = 0;
-char vendorModbusRtu = 1;
+char vendorModbusRtu = 0;
 
 
 //_____________________D E C L A R A T I O N S___________________________

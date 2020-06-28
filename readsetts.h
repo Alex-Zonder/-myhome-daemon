@@ -48,7 +48,8 @@ void ReadMainSettsFile () {
                 else if (strcmp(name,"UserSettsFile")==0) strcpy(UserSettsFile,data);
                 //else if (strcmp(name,"MainUser")==0) strcpy(MainUser,data);
 				// Vendors //
-				else if (strcmp(name,"vendor-uniel")==0) vendorUniel=atoi(data);
+                else if (strcmp(name,"Vendor-Uniel")==0) vendorUniel=atoi(data);
+                else if (strcmp(name,"Vendor-ModbusRtu")==0) vendorModbusRtu=atoi(data);
             }
         }
         fclose (file);
