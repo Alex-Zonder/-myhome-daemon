@@ -35,7 +35,7 @@ Command byte (01)
 
 
 //   ModBusRtu CRC   //
-int crc_chk ( unsigned char* data, unsigned char length )
+int crc_chk (unsigned char* data, unsigned char length)
 {
     register unsigned int reg_crc = 0XFFFF;
     register int j;
@@ -53,7 +53,9 @@ int crc_chk ( unsigned char* data, unsigned char length )
 
 
 unsigned char mobusrtuData[32] = "";
-unsigned char* cyber2modbusrtu(char* input) {
+int cyber2modbusrtu(char* input) {
+    int commLen = 0;
+
     //   Address   //
     mobusrtuData[0] = (input[1] - 0x30) * 10 + (input[2] - 0x30); // 00 - address
 
@@ -68,9 +70,23 @@ unsigned char* cyber2modbusrtu(char* input) {
 
         mobusrtuData[4] = 0; // 04 - Hi Количество регистров
         mobusrtuData[5] = 0x01; // 05 - Lo Количество регистров
+        commLen = 6;
+    }
+    // Get all state //
+    else if (input[3] == 'Z') {
+        //   Command   //
+        mobusrtuData[1] = 3; // 01 - command
+
+        //   Data   //
+        mobusrtuData[2] = 0; // 02 - Hi Адрес регистра
+        mobusrtuData[3] = 1; // 03 - Lo Адрес регистра
+
+        mobusrtuData[4] = 0; // 04 - Hi Количество регистров
+        mobusrtuData[5] = 8; // 05 - Lo Количество регистров
+        commLen = 6;
     }
     // Change state //
-    if (input[6] == 'N' || input[6] == 'F') {
+    else if (input[6] == 'N' || input[6] == 'F') {
         //   Command   //
         mobusrtuData[1] = 6; // 01 - command
 
@@ -80,15 +96,17 @@ unsigned char* cyber2modbusrtu(char* input) {
 
         mobusrtuData[4] = input[6] == 'N' ? 1 : 2; // 04 - Change port 01 or 02
         mobusrtuData[5] = 0; // 05 - Lo Количество регистров
+        commLen = 6;
     }
 
     //   CRC   //
-    int crc = crc_chk(mobusrtuData, 6);
+    int crc = crc_chk(mobusrtuData, commLen);
     // printf("%02X\n", crc);
     unsigned char *rep = (unsigned char *)&crc;
     // printf("%s\n", hex2string(rep,2));
-    mobusrtuData[6] = rep[0]; // 06 - Hi CRC
-    mobusrtuData[7] = rep[1]; // 07 - Lo CRC
+    mobusrtuData[commLen++] = rep[0]; // 06 - Hi CRC
+    mobusrtuData[commLen++] = rep[1]; // 07 - Lo CRC
+    mobusrtuData[commLen] = '\0';
     //   Return   //
-    return mobusrtuData;
+    return commLen;
 }

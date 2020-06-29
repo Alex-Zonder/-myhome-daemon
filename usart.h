@@ -179,8 +179,9 @@ void *ReadUsart(void *arg) {	// Read Usart
                 if (vendorModbusRtu) {
                     printf("USART - Read %i bytes", usart_rx_length);
                     printf(":%s", hex2string((unsigned char*)usart_rx, usart_rx_length));
-                    int crc = crc_chk((unsigned char*)usart_rx, usart_rx_length-2);
-                    printf(":%02X\n", crc);
+                    int crc = crc_chk((unsigned char*)usart_rx, usart_rx_length - 2);
+                    unsigned char *crcBytes = (unsigned char *)&crc;
+                    printf(":%s\n", hex2string(crcBytes, 2));
                     // code..
                 }
             }
@@ -218,9 +219,9 @@ void UsartSend (char command[255]) {		// SEND TO USART
         }
         //   ModBusRtu   //
         else if (vendorModbusRtu) {
-            commandLen = 8;
-            memcpy(command, cyber2modbusrtu(command), 8);
-            sprintf(strToPrint,"ModBusRtu Send: %s", hex2string((unsigned char*)command, 8));
+            commandLen = cyber2modbusrtu(command);
+            memcpy(command, mobusrtuData, commandLen);
+            sprintf(strToPrint,"ModBusRtu Send: %s", hex2string((unsigned char*)command, commandLen));
             MyPrint ();
         }
 
