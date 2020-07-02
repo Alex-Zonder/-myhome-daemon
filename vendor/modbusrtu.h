@@ -35,7 +35,7 @@ Command byte (01)
 
 
 //   ModBusRtu CRC   //
-int crc_chk (unsigned char* data, unsigned char length)
+int mrtGenCrc (unsigned char* data, unsigned char length)
 {
     register unsigned int reg_crc = 0XFFFF;
     register int j;
@@ -49,9 +49,19 @@ int crc_chk (unsigned char* data, unsigned char length)
     }
     return reg_crc;
 }
+int mrtChkCrc (unsigned char* input, unsigned char length)
+{
+    int crc = mrtGenCrc((unsigned char*)input, length - 2);
+    unsigned char *crcBytes = (unsigned char *)&crc;
+    // CRC OK //
+    if (input[length - 2] == crcBytes[0] && input[length - 1] == crcBytes[1]) {
+        return 1;
+    }
+    else return 0;
+}
 
 
-
+// Convert from CyberLight to Modbus RTU //
 unsigned char mobusrtuData[32] = "";
 int cyber2modbusrtu(char* input) {
     int commLen = 0;
@@ -100,7 +110,7 @@ int cyber2modbusrtu(char* input) {
     }
 
     //   CRC   //
-    int crc = crc_chk(mobusrtuData, commLen);
+    int crc = mrtGenCrc(mobusrtuData, commLen);
     // printf("%02X\n", crc);
     unsigned char *rep = (unsigned char *)&crc;
     // printf("%s\n", hex2string(rep,2));
@@ -109,4 +119,53 @@ int cyber2modbusrtu(char* input) {
     mobusrtuData[commLen] = '\0';
     //   Return   //
     return commLen;
+}
+
+
+// Convert from Modbus RTU to CyberLight //
+char cyberCommRet[16];
+char* modbusrtu2cyber(unsigned char* input, int len) {
+    static char addr[4] = "";
+    sprintf(addr, "");
+    char command = '\0';
+    static char data[32] = "";
+    sprintf(data, "");
+
+    // CRC OK //
+    if (mrtChkCrc((unsigned char*)input, len)) {
+        // printf("CRC-OK\n");
+        // Address //
+        addr[0] = (char)(input[0]/10%10)+'0';
+        addr[1] = (char)(input[0]%10)+'0';
+
+        // Command //
+        command = input[1] == 6 ? 'R' : 'Z';
+        if (command == 'Z') {
+            sprintf(data, ":R");
+            int dataLen = input[2] / 2;
+            for (int c=0; c<dataLen; c++)
+            {
+                char bt[2] = "";
+                bt[0] = input[4+c*2]+'0';
+                strcat(data, bt);
+            }
+        }
+        else
+        {
+            sprintf(data, "%c%c%c",
+                (char)(input[3]/10%10)+'0', // 3 - port
+                (char)(input[3]%10)+'0',
+                input[4] == 2 ? 'F' : 'N' // 4 - state (2-off 1-on)
+            );
+        }
+    }
+    // CRC ERROR //
+    else {
+        printf("CRC-Error\n");
+        sprintf(data, "CRC-Error");
+    }
+
+    // Return //
+    sprintf(cyberCommRet, "#%s%c%s;", addr, command, data);
+    return cyberCommRet;
 }

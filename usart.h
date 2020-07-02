@@ -177,12 +177,19 @@ void *ReadUsart(void *arg) {	// Read Usart
 
                 // ModBusRtu //
                 if (vendorModbusRtu) {
-                    printf("USART - Read %i bytes", usart_rx_length);
-                    printf(":%s", hex2string((unsigned char*)usart_rx, usart_rx_length));
-                    int crc = crc_chk((unsigned char*)usart_rx, usart_rx_length - 2);
-                    unsigned char *crcBytes = (unsigned char *)&crc;
-                    printf(":%s\n", hex2string(crcBytes, 2));
+                    // printf("USART - Read %i bytes", usart_rx_length);
+                    // printf(":%s", hex2string((unsigned char*)usart_rx, usart_rx_length));
+                    // int crc = mrtGenCrc((unsigned char*)usart_rx, usart_rx_length - 2);
+                    // unsigned char *crcBytes = (unsigned char *)&crc;
+                    // printf(":%s\n", hex2string(crcBytes, 2));
                     // code..
+                    sprintf(usart_rx, "%s", modbusrtu2cyber((unsigned char*)usart_rx, usart_rx_length));
+
+                    sprintf(strToPrint, "USART - %s", usart_rx);
+                    MyPrint();
+
+                    Tcp_Send(usart_rx);
+                    MakeUserAuto (usart_rx, 0);
                 }
             }
             usleep(10000);
